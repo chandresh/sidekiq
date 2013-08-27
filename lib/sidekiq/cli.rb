@@ -45,7 +45,7 @@ module Sidekiq
     def run
       self_read, self_write = IO.pipe
 
-      %w(INT TERM USR1 USR2 TTIN).each do |sig|
+      %w(HUP INT TERM USR1 USR2 TTIN).each do |sig|
         trap sig do
           self_write.puts(sig)
         end
@@ -88,6 +88,12 @@ module Sidekiq
     def handle_signal(sig)
       Sidekiq.logger.debug "Got #{sig} signal"
       case sig
+      when 'HUP'
+        Sidekiq.logger.info "Received HUP”
+        ## Do the config reload.
+        ## For example: set an environment variable
+        ## which we can check later to reload the config
+
       when 'INT'
         if Sidekiq.options[:profile]
           result = RubyProf.stop
